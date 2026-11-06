@@ -1,21 +1,21 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { SearchBar } from '../components/SearchBar';
-import { BookCard } from '../components/Bookcard';
+import { BookCard } from '../components/BookCard';
+import { BookDetailModal } from '../components/BookDetail';
 
 export const Catalogo = () => {
   const [libros, setLibros] = useState([]);
   const [loading, setLoading] = useState(false);
   const [lastQuery, setLastQuery] = useState('');
+  const [selectedBook, setSelectedBook] = useState(null);
 
-  // Carga inicial y consulta al backend
   const fetchLibros = async (query = '') => {
     setLoading(true);
     const cleanQuery = query.trim();
     setLastQuery(cleanQuery);
 
     try {
-      // Si hay término de búsqueda se envía ?q=..., de lo contrario se consulta /buscar para obtener todo
       const url = cleanQuery !== ''
         ? `http://localhost:5000/api/v1/libros/buscar?q=${encodeURIComponent(cleanQuery)}`
         : `http://localhost:5000/api/v1/libros/buscar`;
@@ -29,7 +29,6 @@ export const Catalogo = () => {
     }
   };
 
-  // Cargar catálogo completo por defecto al renderizar el componente
   useEffect(() => {
     fetchLibros('');
   }, []);
@@ -40,7 +39,6 @@ export const Catalogo = () => {
 
   return (
     <div style={styles.layout}>
-      {/* Sidebar Lateral */}
       <aside style={styles.sidebar}>
         <div style={styles.logoContainer}>
           <div style={styles.logoIcon}>📚</div>
@@ -53,7 +51,6 @@ export const Catalogo = () => {
         </nav>
       </aside>
 
-      {/* Contenido Principal */}
       <main style={styles.main}>
         <header style={styles.header}>
           <div>
@@ -96,11 +93,22 @@ export const Catalogo = () => {
           {!loading && libros.length > 0 && (
             <div style={styles.grid}>
               {libros.map((libro) => (
-                <BookCard key={libro.id} libro={libro} />
+                <BookCard
+                  key={libro.id}
+                  libro={libro}
+                  onSelectBook={(selected) => setSelectedBook(selected)}
+                />
               ))}
             </div>
           )}
         </section>
+
+        {selectedBook && (
+          <BookDetailModal
+            libro={selectedBook}
+            onClose={() => setSelectedBook(null)}
+          />
+        )}
       </main>
     </div>
   );

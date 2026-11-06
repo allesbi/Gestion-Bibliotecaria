@@ -1,4 +1,4 @@
-export const BookCard = ({ libro }) => {
+export const BookCard = ({ libro, onSelectBook }) => {
   return (
     <div style={styles.card}>
       <div style={styles.cardHeader}>
@@ -18,6 +18,13 @@ export const BookCard = ({ libro }) => {
           ))}
         </div>
       </div>
+
+      <button 
+        onClick={() => onSelectBook(libro)}
+        style={styles.detailButton}
+      >
+        Ver detalles
+      </button>
     </div>
   );
 };
@@ -32,11 +39,11 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
+    gap: '12px',
   },
   cardHeader: {
     display: 'flex',
     justifyContent: 'space-between',
-    marginBottom: '12px',
   },
   categoryBadge: {
     backgroundColor: '#f1f5f9',
@@ -55,17 +62,17 @@ const styles = {
     fontSize: '18px',
     fontWeight: '600',
     color: '#0f172a',
-    margin: '0 0 8px 0',
+    margin: 0,
     lineHeight: '1.4',
   },
   author: {
     fontSize: '14px',
     color: '#475569',
-    margin: '0 0 16px 0',
+    margin: 0,
   },
   keywordsContainer: {
     marginTop: 'auto',
-    paddingTop: '12px',
+    paddingTop: '8px',
     borderTop: '1px solid #f1f5f9',
   },
   keywordsLabel: {
@@ -85,5 +92,17 @@ const styles = {
     fontSize: '12px',
     padding: '2px 8px',
     borderRadius: '4px',
+  },
+  detailButton: {
+    width: '100%',
+    padding: '10px',
+    backgroundColor: '#f1f5f9',
+    color: '#1e293b',
+    fontWeight: '600',
+    fontSize: '14px',
+    border: '1px solid #cbd5e1',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    marginTop: '8px',
   },
 };

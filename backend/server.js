@@ -42,20 +42,17 @@ app.get('/api/v1/libros/buscar', async (req, res) => {
   }
 });
 
-// Endpoint: POST /api/v1/prestamos (Solicitar Préstamo de un libro)
+// Endpoint: POST /api/v1/prestamos
 app.post('/api/v1/prestamos', async (req, res) => {
   try {
     const { libro_id } = req.body;
-
     if (!libro_id) {
       return res.status(400).json({ mensaje: 'El ID del libro es requerido' });
     }
-
     const newLoan = await pool.query(
       'INSERT INTO prestamos (libro_id) VALUES ($1) RETURNING *',
       [libro_id]
     );
-
     return res.status(201).json({
       mensaje: 'Préstamo solicitado exitosamente',
       prestamo: newLoan.rows[0]
@@ -63,6 +60,27 @@ app.post('/api/v1/prestamos', async (req, res) => {
   } catch (error) {
     console.error('Error al solicitar préstamo:', error);
     return res.status(500).json({ mensaje: 'Error interno al registrar el préstamo' });
+  }
+});
+
+// Endpoint: POST /api/v1/reservas (NUEVO: Solicitar Reserva)
+app.post('/api/v1/reservas', async (req, res) => {
+  try {
+    const { libro_id } = req.body;
+    if (!libro_id) {
+      return res.status(400).json({ mensaje: 'El ID del libro es requerido' });
+    }
+    const newReservation = await pool.query(
+      'INSERT INTO reservas (libro_id) VALUES ($1) RETURNING *',
+      [libro_id]
+    );
+    return res.status(201).json({
+      mensaje: 'Reserva registrada exitosamente',
+      reserva: newReservation.rows[0]
+    });
+  } catch (error) {
+    console.error('Error al procesar reserva:', error);
+    return res.status(500).json({ mensaje: 'Error interno al registrar la reserva' });
   }
 });
 

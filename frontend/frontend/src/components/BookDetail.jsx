@@ -2,23 +2,38 @@ import { useState } from 'react';
 import axios from 'axios';
 
 export const BookDetailModal = ({ libro, onClose }) => {
-  const [loading, setLoading] = useState(false);
-  const [loanSuccess, setLoanSuccess] = useState(false);
+  const [loadingAction, setLoadingAction] = useState(''); // 'prestamo' o 'reserva'
+  const [actionSuccess, setActionSuccess] = useState(''); // mensaje de confirmación
 
   if (!libro) return null;
 
   const handleRequestLoan = async () => {
-    setLoading(true);
+    setLoadingAction('prestamo');
     try {
       await axios.post('http://localhost:5000/api/v1/prestamos', {
         libro_id: libro.id,
       });
-      setLoanSuccess(true);
+      setActionSuccess('¡Solicitud de préstamo registrada con éxito! Puedes recoger el ejemplar en el mostrador principal.');
     } catch (error) {
       console.error('Error al solicitar el préstamo:', error);
       alert('Ocurrió un error al procesar la solicitud de préstamo.');
     } finally {
-      setLoading(false);
+      setLoadingAction('');
+    }
+  };
+
+  const handleRequestReservation = async () => {
+    setLoadingAction('reserva');
+    try {
+      await axios.post('http://localhost:5000/api/v1/reservas', {
+        libro_id: libro.id,
+      });
+      setActionSuccess('¡Reserva registrada con éxito! Te notificaremos cuando el ejemplar esté disponible.');
+    } catch (error) {
+      console.error('Error al solicitar la reserva:', error);
+      alert('Ocurrió un error al procesar la solicitud de reserva.');
+    } finally {
+      setLoadingAction('');
     }
   };
 
@@ -63,25 +78,34 @@ export const BookDetailModal = ({ libro, onClose }) => {
             </div>
           </div>
 
-          {loanSuccess && (
+          {actionSuccess && (
             <div style={styles.successBanner}>
-              ✅ ¡Solicitud de préstamo registrada con éxito! Puedes recoger el ejemplar en el mostrador principal.
+              ✅ {actionSuccess}
             </div>
           )}
         </main>
 
         <footer style={styles.footer}>
           <button style={styles.secondaryButton} onClick={onClose}>
-            {loanSuccess ? 'Cerrar' : 'Cancelar'}
+            {actionSuccess ? 'Cerrar' : 'Cancelar'}
           </button>
-          {!loanSuccess && (
-            <button
-              style={styles.primaryButton}
-              onClick={handleRequestLoan}
-              disabled={loading}
-            >
-              {loading ? 'Procesando...' : '📖 Solicitar Préstamo'}
-            </button>
+          {!actionSuccess && (
+            <>
+              <button
+                style={styles.reserveButton}
+                onClick={handleRequestReservation}
+                disabled={Boolean(loadingAction)}
+              >
+                {loadingAction === 'reserva' ? 'Reservando...' : '📌 Solicitar Reserva'}
+              </button>
+              <button
+                style={styles.primaryButton}
+                onClick={handleRequestLoan}
+                disabled={Boolean(loadingAction)}
+              >
+                {loadingAction === 'prestamo' ? 'Procesando...' : '📖 Solicitar Préstamo'}
+              </button>
+            </>
           )}
         </footer>
       </div>
@@ -107,7 +131,7 @@ const styles = {
     backgroundColor: '#ffffff',
     borderRadius: '16px',
     width: '90%',
-    maxWidth: '540px',
+    maxWidth: '560px',
     boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
     overflow: 'hidden',
   },
@@ -218,10 +242,10 @@ const styles = {
     borderTop: '1px solid #e2e8f0',
     display: 'flex',
     justifyContent: 'flex-end',
-    gap: '12px',
+    gap: '8px',
   },
   secondaryButton: {
-    padding: '10px 16px',
+    padding: '10px 14px',
     backgroundColor: '#ffffff',
     color: '#475569',
     fontWeight: '600',
@@ -230,8 +254,18 @@ const styles = {
     borderRadius: '8px',
     cursor: 'pointer',
   },
+  reserveButton: {
+    padding: '10px 16px',
+    backgroundColor: '#0284c7',
+    color: '#ffffff',
+    fontWeight: '600',
+    fontSize: '14px',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+  },
   primaryButton: {
-    padding: '10px 20px',
+    padding: '10px 16px',
     backgroundColor: '#1e40af',
     color: '#ffffff',
     fontWeight: '600',

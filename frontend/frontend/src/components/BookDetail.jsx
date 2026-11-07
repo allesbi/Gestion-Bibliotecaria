@@ -1,5 +1,26 @@
+import { useState } from 'react';
+import axios from 'axios';
+
 export const BookDetailModal = ({ libro, onClose }) => {
+  const [loading, setLoading] = useState(false);
+  const [loanSuccess, setLoanSuccess] = useState(false);
+
   if (!libro) return null;
+
+  const handleRequestLoan = async () => {
+    setLoading(true);
+    try {
+      await axios.post('http://localhost:5000/api/v1/prestamos', {
+        libro_id: libro.id,
+      });
+      setLoanSuccess(true);
+    } catch (error) {
+      console.error('Error al solicitar el préstamo:', error);
+      alert('Ocurrió un error al procesar la solicitud de préstamo.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div style={styles.overlay} onClick={onClose}>
@@ -24,7 +45,6 @@ export const BookDetailModal = ({ libro, onClose }) => {
             </div>
           </div>
 
-          {/* Sección Sinopsis / Descripción */}
           <div style={styles.section}>
             <span style={styles.label}>Sinopsis / Descripción</span>
             <p style={styles.descriptionText}>
@@ -42,12 +62,27 @@ export const BookDetailModal = ({ libro, onClose }) => {
               ))}
             </div>
           </div>
+
+          {loanSuccess && (
+            <div style={styles.successBanner}>
+              ✅ ¡Solicitud de préstamo registrada con éxito! Puedes recoger el ejemplar en el mostrador principal.
+            </div>
+          )}
         </main>
 
         <footer style={styles.footer}>
-          <button style={styles.primaryButton} onClick={onClose}>
-            Cerrar Ficha
+          <button style={styles.secondaryButton} onClick={onClose}>
+            {loanSuccess ? 'Cerrar' : 'Cancelar'}
           </button>
+          {!loanSuccess && (
+            <button
+              style={styles.primaryButton}
+              onClick={handleRequestLoan}
+              disabled={loading}
+            >
+              {loading ? 'Procesando...' : '📖 Solicitar Préstamo'}
+            </button>
+          )}
         </footer>
       </div>
     </div>
@@ -167,12 +202,33 @@ const styles = {
     padding: '3px 8px',
     borderRadius: '4px',
   },
+  successBanner: {
+    marginTop: '16px',
+    backgroundColor: '#dcfce7',
+    color: '#15803d',
+    padding: '12px',
+    borderRadius: '8px',
+    fontSize: '13px',
+    fontWeight: '600',
+    border: '1px solid #bbf7d0',
+  },
   footer: {
     padding: '16px 24px',
     backgroundColor: '#f8fafc',
     borderTop: '1px solid #e2e8f0',
     display: 'flex',
     justifyContent: 'flex-end',
+    gap: '12px',
+  },
+  secondaryButton: {
+    padding: '10px 16px',
+    backgroundColor: '#ffffff',
+    color: '#475569',
+    fontWeight: '600',
+    fontSize: '14px',
+    border: '1px solid #cbd5e1',
+    borderRadius: '8px',
+    cursor: 'pointer',
   },
   primaryButton: {
     padding: '10px 20px',
